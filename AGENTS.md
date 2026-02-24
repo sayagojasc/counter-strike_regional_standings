@@ -227,6 +227,9 @@ Detailed documentation for each ranking component is available in the `docs/` fo
 - `docs/lan_wins.md` - LAN Wins component
 - `docs/bounty_offered.md` - Bounty Offered component
 - `docs/bounty_collected.md` - Bounty Collected component
+- `docs/opponent_network.md` - Opponent Network component
+- `docs/seeding_inicial.md` - Seeding overview
+- `docs/head_to_head.md` - Head-to-Head adjustment
 
 ### Adding New Features
 

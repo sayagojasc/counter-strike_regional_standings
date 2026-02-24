@@ -91,3 +91,12 @@ Títulos claros para ejemplos:
 - Decir que Opponent Network evalúa "diversidad de rivales propios"
 - Olvidar que Own Network no afecta el ranking del equipo propio
 - Mencionar Prize Pool Linking en Bounty Offered
+
+## Archivos de Documentación
+
+- `lan_wins.md` - Componente LAN Wins
+- `bounty_offered.md` - Componente Bounty Offered
+- `bounty_collected.md` - Componente Bounty Collected
+- `opponent_network.md` - Componente Opponent Network
+- `seeding_inicial.md` - Visión general del seeding
+- `head_to_head.md` - Ajuste por head-to-head
