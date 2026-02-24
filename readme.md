@@ -1,43 +1,43 @@
-Teams play meaningful matches in third-party events throughout the year. To reduce the burden on Major participants and streamline the Major qualification process, we’re going to leverage those match results to identify teams that should be invited to later qualification stages. 
+Los equipos juegan partidos significativos en eventos de terceros durante todo el año. Para reducir la carga de los participantes de los Major y optimizar el proceso de clasificación, vamos a aprovechar esos resultados de partidos para identificar qué equipos deberían ser invitados a las etapas finales de clasificación.
 
-Our goals for the resulting Regional Standings are that they are accurate, not easily gamed, and have a transparent process.
+Nuestra meta con las Clasificaciones Regionales es que sean precisas, difíciles de manipular y tengan un proceso transparente.
 
-## Regional Standings
+## Clasificaciones Regionales
 
-We will use the Regional Standings to invite teams in future events, so the ideal model is one that predicts future match results. To that end, the current model incorporates the following factors:
+Usaremos las Clasificaciones Regionales para invitar a equipos a eventos futuros, por lo que el modelo ideal es aquel que predice los resultados de partidos futuros. Con ese fin, el modelo actual incorpora los siguientes factores:
 
-1.	Team’s
-    -	Prize money earned
-2.	Beaten opponent’s
-    -	Prize money earned
-    - 	Number of teams beaten
-3.	Head-to-head results
+1.	Equipo
+    -	Dinero ganado en premios
+2.	Oponentes derrotados
+    -	Dinero ganado en premios
+    -	Número de equipos derrotados
+3.	Resultados head-to-head
 
-We know you’re interested in more details. In the coming weeks, this repository will host the actual code used to generate the standings along with a sample dataset.
+ sabemos que estás interesado en más detalles. En las próximas semanas, este repositorio albergará el código real usado para generar las clasificaciones junto con un conjunto de datos de ejemplo.
 
-## Invitations
+## Invitaciones
 
-We will update the standings periodically up until the open qualifiers. These final standings will determine which teams get invited to the closed qualifiers. All other teams will need to compete in the open qualifiers to secure their spot.
+Actualizaremos las clasificaciones periódicamente hasta los open qualifiers. Estas clasificaciones finales determinarán qué equipos serán invitados a los closed qualifiers. Todos los demás equipos deberán competir en los open qualifiers para asegurar su lugar.
 
-The current standings can be found here:
--   [Europe](standings_europe.md)
--   [Americas](standings_americas.md)
+Las clasificaciones actuales se pueden encontrar aquí:
+-   [Europa](standings_europe.md)
+-   [Américas](standings_americas.md)
 -   [Asia](standings_asia.md)
 
-## Evaluating the Model.
+## Evaluando el Modelo
 
-The approach we’re taking to evaluate the accuracy of our model is to measure the relationship between the expected and observed win rates in matches.
+El enfoque que tomamos para evaluar la precisión de nuestro modelo es medir la relación entre las tasas de victoria esperadas y las observadas en los partidos.
 
-We run through each week of matches in our dataset and assign point values to the teams using the preceding week’s Regional Standings. Using the difference in point values, each match is then assigned an expected win rate. We break those win rates down into 5% bins, and then measure the actual win rates for matches that fall within each bin.
+Recorremos cada semana de partidos en nuestro conjunto de datos y asignamos valores de puntos a los equipos usando las Clasificaciones Regionales de la semana anterior. Usando la diferencia en valores de puntos, a cada partido se le asigna una tasa de victoria esperada. Dividimos esas tasas de victoria en intervalos del 5%, y luego medimos las tasas de victoria reales para los partidos que caen dentro de cada intervalo.
 
-Here’s how the expected vs. observed win rates look when we go through this process with the current model:
+Así es como se ven las tasas de victoria esperadas vs. observadas cuando aplicamos este proceso con el modelo actual:
 
 <img src="modelfit.png"/>
- 
-There’s a strong relationship between expected and observed win rates. The correlation between the two (Spearman’s rho in this case) is 0.98. But the slope is shallower than we’d like--in an ideal world, the slope of this line would be closer to 1. The current model tends to underestimate win rates at the low end and overestimate at the high end. 
 
-We think this is a good starting point. 
+Hay una fuerte relación entre las tasas de victoria esperadas y observadas. La correlación entre las dos (rho de Spearman en este caso) es 0.98. Pero la pendiente es más suave de lo que nos gustaría - en un mundo ideal, la pendiente de esta línea estaría más cerca de 1. El modelo actual tiende a subestimar las tasas de victoria en el extremo bajo y sobreestimar en el extremo alto.
 
-## Updating and Improving the Model
+Creemos que este es un buen punto de partida.
 
-The model we’re shipping today is the one we will use through the next Major. We’re going to keep experimenting, and we think you should too. After we ship the code and data in this repository, feel free to tinker and make something new. As long as your model does well and fits our goals, we’d be happy to consider it.
+## Actualizando y Mejorando el Modelo
+
+El modelo que lanzamos hoy es el que usaremos hasta el próximo Major. Vamos a seguir experimentando, y creemos que tú también deberías hacerlo. Después de lanzar el código y los datos en este repositorio, siéntete libre de experimentar y crear algo nuevo. Siempre y cuando tu modelo funcione bien y se ajuste a nuestras metas, estaríamos felices de considerarlo.

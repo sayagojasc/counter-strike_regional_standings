@@ -4,6 +4,8 @@
 
 This is a pure JavaScript (Node.js) project that generates regional standings for Counter-Strike teams based on match results. It uses a Glicko rating system combined with custom seeding modifiers to rank teams.
 
+The system evaluates teams over a **180-day window** with a **30-day grace period** for recent results.
+
 ## Build, Lint, and Test Commands
 
 ### Running the Model
@@ -21,6 +23,13 @@ node main.js '[0]' '../data/matchdata.json' '2024-01-15'  # Custom date
 ```
 
 **Region codes:** 0 = Europe, 1 = Americas, 2 = Asia
+
+### Model Fitting
+
+```bash
+# Run model fitting (evaluates model accuracy)
+node main_fit.js
+```
 
 ### Testing
 
@@ -149,19 +158,40 @@ const ONE_OVER_PI_SQUARED = 1 / (Math.PI * Math.PI);
 ```
 model/
 ├── main.js           # Entry point
+├── main_fit.js       # Model fitting/evaluation
 ├── ranking.js        # Main ranking logic
-├── team.js           # Team class and logic
-├── glicko.js         # Glicko rating system
+├── team.js           # Team class and seeding calculations
+├── glicko.js         # Glicko rating system implementation
 ├── data_loader.js    # Data loading and parsing
 ├── report.js         # Output generation
-├── ranking_context.js # Ranking parameters
+├── ranking_context.js # Ranking parameters and time windows
+├── fit.js            # Model fitting utilities
+├── table.js          # Table generation
 ├── util/
 │   ├── nth_highest.js
 │   ├── region.js
 │   └── remap_value_clamped.js
 ```
 
-### Existing Patterns to Follow
+---
+
+## Seeding Components
+
+The ranking system uses 5 seeding factors (defined in `ranking.js`):
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| `bountyCollected` | 1 | Quality of opponents defeated |
+| `bountyOffered` | 1 | Team's own prize earnings |
+| `opponentNetwork` | 1 | Diversity of opponents defeated |
+| `ownNetwork` | 0 | Disabled |
+| `lanFactor` | 1 | LAN event victories |
+
+See `docs/` folder for detailed documentation on each component.
+
+---
+
+## Existing Patterns to Follow
 
 1. **Chained setters**: Return `this` for builder patterns
    ```javascript
@@ -190,6 +220,14 @@ model/
 
 ## Working with This Codebase
 
+### Documentation
+
+Detailed documentation for each ranking component is available in the `docs/` folder:
+
+- `docs/lan_wins.md` - LAN Wins component
+- `docs/bounty_offered.md` - Bounty Offered component
+- `docs/bounty_collected.md` - Bounty Collected component
+
 ### Adding New Features
 
 1. Identify the appropriate module (e.g., `team.js` for team-related features)
@@ -209,3 +247,9 @@ model/
 - **Add new region**: Update `RegionList` in `main.js` and region mapping in `util/region.js`
 - **Change seeding factors**: Modify `SEED_MODIFIER_FACTORS` in `ranking.js`
 - **Adjust time windows**: Edit `data_loader.js` filter logic
+
+### Important Notes
+
+- **DO NOT push to upstream** - Only push to your fork (origin)
+- **Ask before committing** - Don't commit changes without explicit permission
+- **Sparse checkout** - The repo uses sparse checkout; new files may need manual handling
