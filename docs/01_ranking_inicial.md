@@ -41,20 +41,28 @@ Cada victoria guarda información sobre:
 
 ### Ejemplo Práctico
 
-Imagina que tienes tu bag de Bounty Collected con 10 victorias guardadas:
+Imaginemos un equipo que tiene las siguientes 10 victorias guardadas en su bag de Bounty Collected:
 
 ```
 Bag Bounty Collected (10/10 espacios):
-┌─────────────────────────────────────────────┐
-│ 1. vs Team A - $500K bounty - hace 10 días │
-│ 2. vs Team B - $400K bounty - hace 20 días  │
-│ 3. vs Team C - $300K bounty - hace 30 días  │
-│ ...                                         │
-│ 10. vs Team J - $50K bounty - hace 90 días │
-└─────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│ 1. vs Team A - $500K bounty - Major LAN - hace 10 días    │
+│ 2. vs Team B - $400K bounty - Major LAN - hace 20 días    │
+│ 3. vs Team C - $300K bounty - Major LAN - hace 30 días    │
+│ ...                                                        │
+│ 10. vs Team J - $50K bounty - Online Cup - hace 90 días  │
+└────────────────────────────────────────────────────────────┘
 ```
 
-Si ahora ganas contra un equipo con $100K de bounty, **no entra** porque es peor que tu peor victoria ($50K). Pero si ganas contra un equipo con $600K de bounty, **sí entra** y reemplaza la victoria #10.
+Ahora, este equipo juega un open cup online y gana contra un equipo que tiene $100K de bounty. ¿Esa victoria entra al bag? **No**, porque el sistema no compara solo el valor bruto del bounty del oponente. Compara el **valor ajustado**:
+
+- El evento online tiene un **stakes modifier muy bajo** (~$500 en prize pool)
+- Aunque el oponente tenga $100K de bounty, los ganó en eventos pequeños
+- En cambio, las victorias #1-3 fueron en Major LAN con stakes de $500K
+
+Por eso la victoria de $100K en el open cup no supera a la victoria #10 de $50K del Major.
+
+Ahora bien, si ese mismo equipo con $100K de bounty juega y pierde contra ti en un **Major** (alto stakes), esa victoria **sí** entraría al bag y reemplazaría la #10, porque el contexto (stakes alto, evento LAN) es comparable.
 
 ### Por Qué Solo 10 Victorias
 
@@ -90,6 +98,53 @@ Una qualy sin prize pool tiene **impacto mínimo**:
 - **Opponent Network**: Nulo o muy bajo
 
 Sin embargo, si esa qualy es parte de un evento mayor (como una clasificatoria para un Major), puede **heredar el stakes modifier** del evento principal mediante el **Prize Pool Linking**. En ese caso, una victoria en qualy puede mejorar significativamente el Bounty Collected y Opponent Network.
+
+### Partido Online (Torneo Abierto)
+
+Un partido en un torneo online (como una league open division) solo activa **3 componentes**:
+
+- **LAN Wins**: No cuenta (no es presencial)
+- **Bounty Offered**: $0 (no hay prize o es muy pequeño)
+- **Bounty Collected**: Bajo (stakes modifier bajo)
+- **Opponent Network**: Bajo (normalmente)
+
+### Por Qué los Eventos Online No Son Productivos para el Seed
+
+Los eventos online (open cups, qualys abiertas, leagues abiertas) tienden a no mejorar significativamente tu seed por varias razones:
+
+1. **Stakes bajo**: La mayoría de estos eventos tienen prize pools pequeños o nulos, lo que significa bajo stakes modifier
+
+2. **Brechas de calidad enormes**: Son eventos con muchos equipos (64, 128, 256 equipos). Las primeras rondas enfrentan a equipos muy superiores contra muy inferiores. Es como un equipo top jugando contra un equipo amateur.
+
+3. **Rara vez enfrentas rivales de calidad**: Tu victoria en ronda 1 es contra el equipo #200 del mundo, que tiene $0 de bounty y bajo Own Network. Ni tu Bounty Collected ni tu Opponent Network mejoran.
+
+4. **Las victorias no superan las del bag**: Una victoria contra un equipo sin historial en un open cup online **nunca** será mejor que una victoria contra un equipo top en un Major LAN. Aunque el oponente tenga más bounty, el contexto (stakes modifier bajo) hace que el valor final sea menor.
+
+#### Ejemplo Concreto
+
+**Tu bag actual tiene:**
+```
+┌────────────────────────────────────────────────────────────┐
+│ vs Team Top - $500K bounty - Major LAN - stakes 500K     │
+│ vs Team Top - $400K bounty - Major LAN - stakes 500K     │
+│ vs Team Mid - $200K bounty - ESL Pro League - stakes 100K│
+└────────────────────────────────────────────────────────────┘
+```
+
+**Juegas un open cup online:**
+- Ganas contra Team Nuevo ($0 bounty) en ronda 1 → No entra al bag
+- Ganas contra Team Amateur ($0 bounty) en ronda 2 → No entra al bag
+- Ganas contra Team Semi-Pro ($5K bounty) en ronda 3 → No entra al bag
+
+**¿Por qué no entró ninguna?**
+- Los oponentes tienen poco o ningún bounty
+- El stakes modifier del open cup es muy bajo (~$500)
+- Aunque ganes 10 partidos, ninguno supera a tu peor victoria del bag
+
+**En cambio, si ese mismo equipo Semi-Pro con $5K de bounty juega y gana en un Major:**
+- Su bounty sería mucho mayor (hereda stakes del Major)
+- Derrotarlo te daría puntos en Bounty Collected y Opponent Network
+- Esa victoria **sí** podría entrar a tu bag
 
 ### Ejemplo Concreto
 

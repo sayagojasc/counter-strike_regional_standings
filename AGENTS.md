@@ -256,3 +256,7 @@ Detailed documentation for each ranking component is available in the `docs/` fo
 - **DO NOT push to upstream** - Only push to your fork (origin)
 - **Ask before committing** - Don't commit changes without explicit permission
 - **Sparse checkout** - The repo uses sparse checkout; new files may need manual handling
+
+## Git Operations
+
+**IMPORTANT**: Only execute git commands (commit, push, pull, merge, branch, etc.) when explicitly requested by the user. Do NOT perform any git operations on your own initiative.
