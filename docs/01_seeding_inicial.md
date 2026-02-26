@@ -20,7 +20,43 @@ Mide la calidad de los rivales derrotados basado en sus ganancias. Considera tre
 ### Opponent Network
 Mide la calidad de los rivales derrotados basado en cuántos equipos diferentes han derrotado esos rivales. Considera tres factores: el Own Network del oponente, el decay temporal, y el stakes modifier del evento.
 
-## El Sistema de Bags (Analogía MMORPG)
+## Conceptos Generales (Aplican a Todos los Componentes)
+
+### Ventana de Tiempo y Decay
+
+El sistema considera solo los partidos de los últimos **180 días**. Partidos más antiguos no cuentan.
+
+Los últimos **30 días** tienen peso completo (decay = 1.0). Pasados los 30 días, el peso decae linealmente hasta llegar a 0 al final de los 180 días.
+
+### Selección de Mejores Victorias
+
+Cada componente solo puede considerar las **10 mejores victorias** del equipo. Este límite cumple varios propósitos:
+
+1. **Previene inflado**: Un equipo no puede spamear partidos fáciles para aumentar su rating inicial
+2. **Premia calidad sobre cantidad**: Es mejor tener 10 victorias contra equipos top que 100 victorias contra equipos débiles
+3. **Mantiene relevancia**: Las victorias antiguas eventualmente salen del top 10 y se reemplazan por mejores
+4. **Reduce ruido**: Solo las mejores performances contribuyen al rating inicial
+
+### Normalización
+
+La normalización es el proceso de comparar el valor de un equipo contra los demás equipos del dataset para obtener un número entre 0 y 1.
+
+- **Componentes que se normalizan**: LAN Wins, Bounty Offered, Own Network
+- **Componentes que NO se normalizan**: Bounty Collected, Opponent Network (ya usan valores del oponente que están normalizados)
+
+### Prize Pool Linking
+
+El Prize Pool Linking es un mecanismo que permite que las clasificatorias (qualys) hereden parte del prize pool del evento principal.
+
+Cuando un evento clasifica a otro (ej: un RMR se clasifica a un Major), el evento clasificatorio hereda parte del prize pool del evento principal. Si un RMR de $50,000 otorga clasificación a un Major de $1,000,000, el RMR pasa a considerarse como un evento de $550,000 ($50,000 + $1,000,000 × 0.5).
+
+Este mecanismo aplica solo a **Bounty Collected** y **Opponent Network** a través del stakes modifier. No afecta a LAN Wins ni Bounty Offered.
+
+---
+
+## El Sistema de Bags (Analogía)
+
+> **Nota:** Esta es una **analogía para facilitar la comprensión**. El modelo no usa términos como "bag" o "mochila". Es simplemente una forma de visualizar cómo el sistema selecciona las 10 mejores victorias de cada componente.
 
 Imagina que cada componente del ranking es como una **mochila (bag)** que solo puede contener **10 items**. Cada victoria que consigues es un item que entra en la mochila correspondiente.
 
@@ -64,22 +100,13 @@ Por eso la victoria de $100K en el open cup no supera a la victoria #10 de $50K 
 
 Ahora bien, si ese mismo equipo con $100K de bounty juega y pierde contra ti en un **Major** (alto stakes), esa victoria **sí** entraría al bag y reemplazaría la #10, porque el contexto (stakes alto, evento LAN) es comparable.
 
-### Por Qué Solo 10 Victorias
-
-El límite de 10 victorias por componente cumple varios propósitos:
-
-1. **Previene inflado**: Un equipo no puede spamear partidos fáciles para aumentar su rating
-2. **Premia calidad sobre cantidad**: Es mejor tener 10 victorias contra equipos top que 100 victorias contra equipos débiles
-3. **Mantiene relevancia**: Las victorias antiguas (por decay) eventualmente salen del top 10 y se reemplazan por mejores
-4. **Reduce ruido**: Solo las mejores performances contribuyen al rating
-
 ## Factores del Partido
 
 No todas las victorias son iguales. El tipo de partido afecta significativamente cuánto contribuye al ranking:
 
 ### Partido LAN (Evento Presencial)
 
-Un partido de un evento LAN activa **todos los componentes**:
+Un partido de un evento LAN puede activar **todos los componentes**:
 
 - **LAN Wins**: +1 victoria LAN
 - **Bounty Offered**: Ganas dinero del prize pool
@@ -97,7 +124,7 @@ Una qualy sin prize pool tiene **impacto mínimo**:
 - **Bounty Collected**: Nulo o muy bajo (stakes modifier ~0)
 - **Opponent Network**: Nulo o muy bajo
 
-Sin embargo, si esa qualy es parte de un evento mayor (como una clasificatoria para un Major), puede **heredar el stakes modifier** del evento principal mediante el **Prize Pool Linking**. En ese caso, una victoria en qualy puede mejorar significativamente el Bounty Collected y Opponent Network.
+Sin embargo, si esa qualy es parte de un evento mayor (como una clasificatoria para un torneo Tier 1), puede beneficiarse del **Prize Pool Linking**. En ese caso, una victoria en qualy puede mejorar significativamente el Bounty Collected y Opponent Network.
 
 ### Partido Online (Torneo Abierto)
 
@@ -108,17 +135,17 @@ Un partido en un torneo online (como una league open division) solo activa **3 c
 - **Bounty Collected**: Bajo (stakes modifier bajo)
 - **Opponent Network**: Bajo (normalmente)
 
-### Por Qué los Eventos Online No Son Productivos para el Seed
+### Por Qué los Eventos Online Generalmente No Son Productivos para el Seed
 
 Los eventos online (open cups, qualys abiertas, leagues abiertas) tienden a no mejorar significativamente tu seed por varias razones:
 
 1. **Stakes bajo**: La mayoría de estos eventos tienen prize pools pequeños o nulos, lo que significa bajo stakes modifier
 
-2. **Brechas de calidad enormes**: Son eventos con muchos equipos (64, 128, 256 equipos). Las primeras rondas enfrentan a equipos muy superiores contra muy inferiores. Es como un equipo top jugando contra un equipo amateur.
+2. **Brechas de calidad enormes**: Son eventos con muchos equipos (24, 32 o mas equipos). Las primeras rondas enfrentan a equipos muy superiores contra muy inferiores. Es como un equipo top jugando contra un equipo amateur.
 
 3. **Rara vez enfrentas rivales de calidad**: Tu victoria en ronda 1 es contra el equipo #200 del mundo, que tiene $0 de bounty y bajo Own Network. Ni tu Bounty Collected ni tu Opponent Network mejoran.
 
-4. **Las victorias no superan las del bag**: Una victoria contra un equipo sin historial en un open cup online **nunca** será mejor que una victoria contra un equipo top en un Major LAN. Aunque el oponente tenga más bounty, el contexto (stakes modifier bajo) hace que el valor final sea menor.
+4. **Las victorias no superan las del bag**: Una victoria contra un equipo sin historial en un torneo online **rara vez** será mejor que una victoria contra un equipo top en un torneo LAN. Aunque el oponente tenga más bounty, el contexto (stakes modifier bajo) hace que el valor final sea menor.
 
 #### Ejemplo Concreto
 
@@ -131,18 +158,18 @@ Los eventos online (open cups, qualys abiertas, leagues abiertas) tienden a no m
 └────────────────────────────────────────────────────────────┘
 ```
 
-**Juegas un open cup online:**
+**Juegas un torneo online:**
 - Ganas contra Team Nuevo ($0 bounty) en ronda 1 → No entra al bag
 - Ganas contra Team Amateur ($0 bounty) en ronda 2 → No entra al bag
 - Ganas contra Team Semi-Pro ($5K bounty) en ronda 3 → No entra al bag
 
 **¿Por qué no entró ninguna?**
 - Los oponentes tienen poco o ningún bounty
-- El stakes modifier del open cup es muy bajo (~$500)
+- El stakes modifier del torneo es muy bajo (~$5K)
 - Aunque ganes 10 partidos, ninguno supera a tu peor victoria del bag
 
 **En cambio, si ese mismo equipo Semi-Pro con $5K de bounty juega y gana en un Major:**
-- Su bounty sería mucho mayor (hereda stakes del Major)
+- Su bounty sería mucho mayor
 - Derrotarlo te daría puntos en Bounty Collected y Opponent Network
 - Esa victoria **sí** podría entrar a tu bag
 
@@ -164,37 +191,6 @@ Los eventos online (open cups, qualys abiertas, leagues abiertas) tienden a no m
 - El oponente tiene bajo Own Network → Opponent Network no mejora
 - **Resultado**: Casi no afecta el ranking
 
-## El Decay (Pérdida de Valor Temporal)
-
-El decay es una penalización temporal que afecta a **todos los componentes por igual**. Funciona así:
-
-### Período de 180 Días
-
-Solo se consideran partidos de los últimos **180 días**. Partidos más antiguos no cuentan.
-
-### Período de Gracia de 30 Días
-
-Los últimos **30 días** tienen peso completo (decay = 1.0). Pasados los 30 días, el peso decae linealmente hasta llegar a 0 al final de los 180 días.
-
-### Cómo Afecta el Decay
-
-Una victoria de hace 10 días prácticamente no ha perdido valor. Una victoria de hace 170 días tiene peso casi 0.
-
-Esto significa que:
-- **Victorias recientes**: Valen 100% de su potencial
-- **Victorias de 30-90 días**: Valen entre 100% y 50%
-- **Victorias de 90-180 días**: Valen menos del 50%
-- **Victorias mayores a 180 días**: Se ignoran completamente
-
-### Interacción con el Sistema de Bags
-
-El decay no elimina victorias del bag automáticamente. En cambio:
-
-1. Cada victoria en el bag tiene un "timestamp" de cuándo ocurrió
-2. Al calcular el valor total del componente, el sistema aplica el decay a cada victoria
-3. Si una victoria muy antigua ya no aporta casi nada, eventualmente será superada por una victoria más reciente (que sí tiene decay alto)
-4. Cuando una nueva victoria entra al bag, la más antigua sale
-
 ## Cómo se Calcula el Seed Value
 
 Una vez calculados los 4 componentes, el sistema los combina en un solo valor:
@@ -203,11 +199,11 @@ Una vez calculados los 4 componentes, el sistema los combina en un solo valor:
 seedValue = (bountyCollected × 1) + (bountyOffered × 1) + (opponentNetwork × 1) + (ownNetwork × 0) + (lanFactor × 1)
 ```
 
-El ownNetwork tiene peso 0, lo que significa que no afecta directamente el rating del equipo. Sin embargo, se calcula y guarda para ser usado cuando otros equipos lo derrotan.
+El ownNetwork tiene peso 0, lo que significa que no afecta directamente el rating inicial del equipo. Sin embargo, se calcula y guarda para ser usado cuando otros equipos lo derrotan.
 
-## Remapeo a Rango de Rating
+## Remapeo a Rango de Rating Inicial
 
-El seedValue resultante se remapea a un rango de rating:
+El seedValue resultante se remapea a un rango de rating inicial:
 
 - **Mínimo**: 400
 - **Máximo**: 2000
@@ -218,11 +214,11 @@ Un equipo con el seedValue más bajo del dataset recibe 400. El equipo con el se
 
 El seeding cumple varias funciones:
 
-1. **Punto de partida razonable**: Un equipo nuevo sin partidos en el sistema starts con un valor coherente en lugar de tener que ganarlo todo desde cero.
+1. **Punto de partida razonable**: Un equipo nuevo sin partidos en el sistema inicia con un valor coherente en lugar de tener que ganarlo todo desde cero.
 
-2. **Reflejar historial**: Equipos con historial exitoso start con ventaja sobre equipos nuevos o sin historial.
+2. **Reflejar historial**: Equipos con historial exitoso inician con ventaja sobre equipos nuevos o sin historial.
 
-3. **Evitar manipulación**: Al combinar múltiples factores y con el límite de 10 victorias, es más difícil inflar el rating jugando el sistema.
+3. **Evitar manipulación**: Al combinar múltiples factores y con el límite de 10 victorias, es más difícil inflar el seeding del sistema.
 
 4. **Ponderación balanceada**: Cada componente captura una dimensión diferente del éxito de un equipo.
 
@@ -239,7 +235,7 @@ El seeding proporciona el punto de partida; los ajustes por head-to-head se enca
 ## Ejemplo Completo
 
 ### Equipo A
-- Tiene 3 victorias LAN recientes → LAN Wins alto
+- Tiene 10 victorias LAN recientes → LAN Wins alto
 - Ha ganado $100,000 en su historial → Bounty Offered alto
 - Derrotó a equipos ricos → Bounty Collected alto
 - Derrotó a equipos con alto Own Network → Opponent Network alto

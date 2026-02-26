@@ -63,7 +63,7 @@ function generateRanking( versionTimestamp = -1, filename )
 {
     // Crear contexto de ranking con configuración de parámetros
     // hveMod: modificador para eventos de alto valor (RMR/Majors)
-    // outlierCount: cuántos valores atípicos ignorar en cálculos
+    // outlierCount: cuántos de los MEJORES valores ignorar al normalizar (ej: el 6to mejor equipo define el máximo)
     const rankingContext = new RankingContext;
     rankingContext.setHveMod(1).setOutlierCount(5);
 
@@ -102,12 +102,14 @@ function generateRanking( versionTimestamp = -1, filename )
 /**
  * Calcula el valor de seeding inicial para cada equipo
  * 
- * El seeding inicial se basa en múltiples factores que reflejan el desempeño
+ * El seeding inicial se basa en múltiples factores normalizados que reflejan el desempeño
  * histórico del equipo en el circuito profesional:
- * - Ganancias en torneos
- * - Cantidad de equipos distintos derrotados
- * - Participación en eventos LAN
- * - Calidad de los rivales derrotados
+ * - bountyOffered: Ganancias propias del equipo en torneos
+ * - bountyCollected: Calidad de los rivales derrotados (basado en ganancias de esos rivales)
+ * - opponentNetwork: Diversidad de rivales derrotados (cantidad de equipos distintos enfrentados)
+ * - lanFactor: Participación y rendimiento en eventos LAN
+ * 
+ * NOTA: ownNetwork está deshabilitado (peso 0) en SEED_MODIFIER_FACTORS
  * 
  * @param {Object} glicko - Instancia del sistema Glicko
  * @param {Array} teams - Lista de equipos a inicializar
@@ -124,7 +126,8 @@ function seedTeams( glicko, teams ) {
     let maxSeedValue = Math.max( ...teams.map(t => t.seedValue ) );
 
     teams.forEach( team => {
-        // Remapear del rango actual al rango de seeding
+        // Remapear del rango [minSeedValue, maxSeedValue] al rango de seeding [400, 2000]
+        // Si el equipo tiene el mejor seeding, queda en 2000; el peor, en 400
         team.rankValue = remapValueClamped( team.seedValue, minSeedValue, maxSeedValue, MIN_SEEDED_RANK, MAX_SEEDED_RANK );
 
         // Guardar el valor original de seeding para referencia
