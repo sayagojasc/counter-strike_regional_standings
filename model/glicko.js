@@ -15,17 +15,55 @@
  * - Mayor rating = mejor equipo
  */
 
-// Factor de conversión: convierte la escala Glicko-2 a Glicko
-// log(10)/400 ≈ 0.00575646
-// Esto relaciona el rating de 400 puntos de diferencia con ~90% probabilidad de victoria
+/**
+ * Constante Q - Factor de escala para el sistema Glicko
+ * 
+ * Q = log(10) / 400 ≈ 0.00575646
+ * 
+ * Esta constante es fundamental en la fórmula de probabilidad esperada de victoria.
+ * En Glicko, la probabilidad de que un equipo gane se calcula así:
+ * 
+ *   E = 1 / (1 + 10^(-g(μ - μj)/400))
+ * 
+ * Donde:
+ * - μ y μj son los ratings de los dos equipos
+ * - g es un factor que depende de la incertidumbre del oponente
+ * - 400 es la constante que determina la "ancho" de la curva
+ * 
+ * ¿Por qué 400 puntos?
+ * Si dos equipos tienen 400 puntos de diferencia:
+ * - 10^(-400/400) = 10^(-1) = 0.1
+ * - E = 1 / (1 + 0.1) = 1 / 1.1 ≈ 0.91
+ * 
+ * Esto significa que el equipo con mayor rating tiene ~91% de probabilidad de ganar.
+ * Si la diferencia fuera 0 puntos, ambos tendrían 50% de probabilidad.
+ * 
+ * Q se usa para convertir entre las escalas Glicko-2 y Glicko-1.
+ * En la práctica, determina "qué tan rápido cambia la probabilidad" 
+ * cuando cambia el rating.
+ */
 const Q = Math.log(10) / 400;
 
 /**
- * Constante de decaimiento RD
+ * Constante C - Factor de decaimiento de incertidumbre (RD)
  * 
- * Controla cómo aumenta la incertidumbre (RD) con el tiempo sin partidos.
- * Valor actual (34.6): RD decae al máximo (350) después de ~100 unidades de tiempo.
- * Mayor valor = más rápido aumenta la incertidumbre.
+ * Controla cómo aumenta la incertidumbre (RD) con el tiempo sin jugar.
+ * 
+ * La fórmula de decaimiento es: RD' = √(RD² + C² × t)
+ * Donde t es el número de "períodos" sin jugar.
+ * 
+ * ¿Qué son las "unidades de tiempo"?
+ * En Glicko, el tiempo es genérico. Puede representarse:
+ * - Por evento/torneo jugado (cada partido = 1 unidad)
+ * - Por día/semana/mes (si se tiene el timestamp de cada partido)
+ * 
+ * En la práctica, esta constante NO se usa actualmente porque
+ * el sistema usa RD fijo (setFixedRD(75)) para comportarse como Elo.
+ * Si se quisiera implementar decaimiento real, se debería llamar a
+ * decayRD() entre eventos usando el tiempo transcurrido como parámetro.
+ * 
+ * Valor actual (34.6): Significa que después de ~100 períodos sin jugar,
+ * el RD aumentaría significativamente (desde 75 hasta cerca del máximo 350).
  */
 const C = 34.6;
 

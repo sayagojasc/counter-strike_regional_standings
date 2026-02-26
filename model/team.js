@@ -54,14 +54,14 @@ class TeamEvent {
 /**
  * TeamMatch - Representa un partido específico jugado por un equipo
  * 
- * Proporciona acceso convenient a información del partido desde
+ * Proporciona acceso conveniente a información del partido desde
  * la perspectiva de un equipo específico.
  */
 class TeamMatch {
     /**
      * Crea una nueva instancia de partido para un equipo
      * 
-     * @param {Team} team - Equipo associated con el partido
+     * @param {Team} team - Equipo asociado con el partido
      * @param {Object} match - Datos del partido
      * @throws {Error} Si el equipo no participó en el partido
      */
@@ -237,12 +237,19 @@ class Team {
     }
 
     /**
-     * Determina la región primaria del equipo basada en la nacionalidad de los jugadores
+     * Determina la(s) región(es) del equipo basada en la nacionalidad de los jugadores del roster activo
      * 
-     * Utiliza plurality (mayoría) para determinar la región:
-     * 1. Cuenta jugadores por región
-     * 2. Si hay representación de todas las regiones, usa prioridad más baja
-     * 3. Un equipo puede pertencer a múltiples regiones (ej: roster mixto)
+     * Un equipo puede pertenecer a una o múltiples regiones dependiendo de la composición de su roster.
+     * El algoritmo funciona así:
+     * 
+     * 1. Cuenta cuántos jugadores hay de cada región (Europa, Américas, Asia)
+     * 2. Si hay jugadores de regiones subrepresentadas (ej: África), se otorga prioridad a la región menos representada globalmente
+     * 3. Determina qué región tiene más jugadores y la asigna al equipo
+     * 4. Si el equipo tiene más jugadores de Asia, también puede clasificarse como Asia (región = [0, 0, 1])
+     * 
+     * El resultado es un array de 3 valores [Europa, Américas, Asia] donde cada valor es 1 o 0.
+     * Un roster europeo puro resultaría en [1, 0, 0].
+     * Un roster mixto (2 europeos, 2 americanos, 1 asiático) resultaría en [1, 1, 1].
      */
     setPluralityRegion() {
         let players = this.activeRoster;
@@ -285,7 +292,7 @@ class Team {
      * 
      * FASE 1: Cálculos individuales
      * - Partidos jugados
-     * -Último partido jugado
+     * - Último partido jugado
      * - Equipos distintos derrotados (network propio)
      * - Ganancias en eventos
      * - Victorias en LAN

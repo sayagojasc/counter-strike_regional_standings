@@ -99,7 +99,8 @@ class RankingContext {
             return 1;
         }
 
-        // Mapear timestamp al rango [0, 1]
+        // Mapear timestamp al rango [0, 1]: más antiguo = 0, más reciente = 1
+        // Si el timestamp está fuera de la ventana, se clampa a 0 o 1
         let clamp = remapValueClamped( timeStamp, this.timeWindowStart, this.timeWindowEnd, 0, 1 )
         
         // Aplicar decaimiento temporal

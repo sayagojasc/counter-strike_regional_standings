@@ -234,7 +234,7 @@ function initTeams( matches, events, rankingContext ) {
      * Inserta o recupera un equipo basado en su roster
      * 
      * Si ya existe un equipo con roster similar (3+ jugadores compartidos),
-     * retorna ese equipo. Sinon, crea uno nuevo.
+     * retorna ese equipo. Si no, crea uno nuevo.
      * 
      * @param {string} name - Nombre del equipo
      * @param {Array} players - Lista de jugadores
@@ -296,11 +296,21 @@ function initTeams( matches, events, rankingContext ) {
 }
 
 /**
- * Calcula el contenido de información de un partido
+ * Calcula el factor de contenido de información de un partido
  * 
- * El contenido de información ajusta cuánto afecta un partido
- * al rating. Partidos más recientes tienen más información
- * sobre la habilidad actual de los equipos.
+ * Este factor determina cuánto peso tiene un partido en la actualización del rating Glicko.
+ * Es un valor entre 0 y 1 que se multiplica al cambio de rating calculado por Glicko.
+ * 
+ * ¿Por qué existe?
+ * - Partidos recientes son más relevantes para evaluar la habilidad actual de un equipo
+ * - Partidos muy antiguos pueden no reflejar la habilidad actual (el equipo pudo cambiar roster)
+ * - Un valor de 1 = el partido cuenta completamente
+ * - Un valor de 0.5 = el partido cuenta solo la mitad (impacto reducido)
+ * - Un valor de 0 = el partido no afecta el rating
+ * 
+ * Actualmente solo usa el modificador de timestamp:
+ * - Partidos recientes (dentro de la ventana de tiempo): valor ~1
+ * - Partidos antiguos (cerca del inicio de la ventana): valor ~0
  * 
  * @param {Object} match - Partido a evaluar
  * @param {Object} rankingContext - Contexto de ranking
@@ -352,7 +362,7 @@ class DataLoader
         this.events = {};
         this.teams = {};
         this.filterEndTime = -1;
-        this.filterWindow = 6*30*24*3600; // 6 meses en segundos
+        this.filterWindow = 6*30*24*3600; // 180 días en segundos
         this.rankingContext = rankingContext;
     }
 
@@ -434,7 +444,10 @@ class DataLoader
         // Determinar ventana de tiempo para datos
         const [startTime,endTime] = findTimeWindow( matches, this.filterEndTime, this.filterWindow );
         
-        // Grace period de 1 mes para permitir que datos recientes se estabilicen
+        // Grace period de 30 días para calcular el peso de los partidos
+        // Los partidos jugados en los últimos 30 días tienen peso completo (valor 1),
+        // mientras que los partidos más antiguos tienen peso reducido (decaimiento).
+        // Esto permite que datos recientes se estabilicen antes de influir plenamente en el rating.
         let graceperiod = 30 * 24 * 3600; 
         this.rankingContext.setTimeWindow( startTime, endTime - graceperiod );
         matches = filterMatchesByTime( matches, startTime, endTime );
@@ -469,7 +482,7 @@ class DataLoader
             }
         }
 
-        // Registrar último tiempo de partido por evento
+        // Determinar la fecha/hora del último partido jugado en cada evento
         matches.forEach( match => {
             let event = events[match.eventId];
             if( event !== undefined )

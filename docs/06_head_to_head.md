@@ -16,7 +16,7 @@ Antes de procesar un head-to-head, el sistema calcula quién debería ganar bas�
 
 ## Cómo Funciona
 
-### El Flujo
+### Cálculo del Ajuste Head-to-Head
 
 1. **Identificar resultado**: El sistema sabe qué equipo ganó y cuál perdió.
 
@@ -56,24 +56,65 @@ El ajuste fue pequeño porque el resultado era esperado.
 **Resultado:** B gana
 
 **Después:**
-- Equipo B: rating sube mucho
-- Equipo A: rating baja mucho
+- Equipo B: rating 1220 (+20)
+- Equipo A: rating 1480 (-20)
 
-El ajuste fue grande porque el resultado fue sorpresivo.
+El ajuste fue mayor que en el ejemplo simple porque el resultado fue sorpresivo.
+
+### Ejemplo 3: Partidos antiguos
+
+**Antes:**
+- Equipo A: rating 1500
+- Equipo B: rating 1400
+
+**Partido fue hace 170 días** (peso casi 0)
+
+**Resultado:** A gana
+
+**Después:**
+- Equipo A: rating 1501 (+1)
+- Equipo B: rating 1399 (-1)
+
+El ajuste fue mínimo porque el partido es muy antiguo.
+
+### Ejemplo 4: Derrota sorpresiva
+
+**Antes:**
+- Equipo A: rating 1400
+- Equipo B: rating 1300
+
+**El sistema espera:** A tiene ligera ventaja
+
+**Resultado:** B gana
+
+**Después:**
+- Equipo B: rating 1325 (+25)
+- Equipo A: rating 1375 (-25)
+
+El ajuste es moderado porque la diferencia de rating era pequeña pero el resultado fue sorpresivo.
 
 ## Information Content
 
 Los head-to-head recientes tienen más impacto que los antiguos:
 
-- Head-to-head de hace 10 días: impacto alto
-- Head-to-head de hace 170 días: impacto bajo
-
-## Incertidumbre del Oponente
-
-Si el oponente no ha jugado en mucho tiempo, el head-to-head tiene menos impacto. Esto evita que un equipo infle su rating jugando contra rivales inactivos.
+- **Últimos 30 días**: peso completo (1.0)
+- **Entre 30 y 180 días**: peso decae linealmente hasta 0
+- Ejemplo: hace 10 días = peso completo, hace 170 días = peso casi 0
 
 ## Relación con Seeding
 
 1. Primero se calcula el seeding de cada equipo
 2. Luego se procesan los head-to-head en orden cronológico
 3. El rating final es: seeding + ajustes por head-to-head
+
+## Por Qué Ajusta el Rating
+
+El sistema usa head-to-head para actualizar ratings porque:
+
+- **Refleja resultados reales**: El seeding es una estimación inicial basada en historial, pero los head-to-head muestran el estado actual
+- **Resultados sorpresivos tienen mayor peso**: Si un equipo bajo le gana a uno alto, el sistema aprende más de ese resultado
+- **El tiempo importa**: Partidos recientes son más relevantes que los antiguos
+
+## Nota Importante
+
+El rating nunca cambia por sí solo. Un equipo con rating alto que no juega partidos mantiene su rating. Los ajustes solo ocurren cuando hay nuevos head-to-head.

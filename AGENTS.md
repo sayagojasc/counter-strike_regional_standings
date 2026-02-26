@@ -4,7 +4,9 @@
 
 This is a pure JavaScript (Node.js) project that generates regional standings for Counter-Strike teams based on match results. It uses a Glicko rating system combined with custom seeding modifiers to rank teams.
 
-The system evaluates teams over a **180-day window** with a **30-day grace period** for recent results.
+The system evaluates teams over a **180-day window** with a **30-day grace period** for recent results:
+- **180-day window**: Only matches within the last 180 days are considered
+- **30-day grace period**: Matches in the last 30 days have full weight (1.0), while older matches have reduced weight due to time decay
 
 ## Build, Lint, and Test Commands
 
@@ -148,10 +150,47 @@ const SEED_MODIFIER_FACTORS = {
 - Document magic numbers with constants
 
 ```javascript
-const Q = Math.log(10) / 400;
-const C = 34.6;  // decay constant
-const ONE_OVER_PI_SQUARED = 1 / (Math.PI * Math.PI);
+const Q = Math.log(10) / 400;  // Scale factor for Glicko probability calculations
+const C = 34.6;                // RD decay constant (currently disabled - system uses fixed RD)
+const ONE_OVER_PI_SQUARED = 1 / (Math.PI * Math.PI);  // Mathematical constant for Glicko
 ```
+
+### Commenting Guidelines
+
+All new functions should have JSDoc-style comments in **Spanish** explaining:
+
+1. **What the function does** - Clear description of purpose
+2. **Parameters** - What each parameter means and its type
+3. **Return value** - What the function returns
+4. **Edge cases** - What happens with invalid inputs (throw errors)
+
+Example:
+
+```javascript
+/**
+ * Remapea un valor de un rango de entrada a un rango de salida de forma lineal.
+ * 
+ * Si el valor está fuera del rango de entrada, se "clampa" (limita) al valor más cercano
+ * del rango de salida en lugar de extrapolar.
+ * 
+ * Ejemplo: remapValueClamped(50, 0, 100, 0, 1000) retorna 500 (50% del rango)
+ * Ejemplo: remapValueClamped(150, 0, 100, 0, 1000) retorna 1000 (clamp, excede el máximo)
+ * 
+ * @param {number} val - El valor a remapear
+ * @param {number} inStart - Inicio del rango de entrada
+ * @param {number} inEnd - Fin del rango de entrada
+ * @param {number} outStart - Inicio del rango de salida
+ * @param {number} outEnd - Fin del rango de salida
+ * @returns {number} El valor remapeado en el rango de salida
+ */
+```
+
+**Important concepts to document clearly:**
+
+- **outlierCount**: Ignora los N valores más altos (los mejores equipos) al normalizar. Ej: Si outlierCount=5, el 6to mejor equipo define el máximo.
+- **informationContent**: Factor (0-1) que determina cuánto peso tiene un partido en la actualización del rating Glicko. Partidos recientes = peso completo (1), partidos antiguos = peso reducido.
+- **grace period**: Período de 30 días al final de la ventana de tiempo donde los partidos tienen peso completo. Permite que datos recientes se estabilicen antes de influir plenamente en el rating.
+- **Seeding factors**: bountyOffered (ganancias propias), bountyCollected (calidad de rivales derrotados), opponentNetwork (diversidad de rivales), lanFactor (victorias LAN). ownNetwork está deshabilitado (peso 0).
 
 ### File Organization
 
@@ -181,11 +220,13 @@ The ranking system uses 5 seeding factors (defined in `ranking.js`):
 
 | Factor | Weight | Description |
 |--------|--------|-------------|
-| `bountyCollected` | 1 | Quality of opponents defeated |
+| `bountyCollected` | 1 | Quality of opponents defeated (based on opponent's prize earnings) |
 | `bountyOffered` | 1 | Team's own prize earnings |
-| `opponentNetwork` | 1 | Diversity of opponents defeated |
-| `ownNetwork` | 0 | Disabled |
+| `opponentNetwork` | 1 | Diversity of opponents defeated (distinct teams faced) |
+| `ownNetwork` | 0 | Disabled (set to 0, not used) |
 | `lanFactor` | 1 | LAN event victories |
+
+**Important**: All values are **normalized against the best teams** before being used in seeding. This means each metric is scaled relative to the top-performing teams, not absolute values.
 
 See `docs/` folder for detailed documentation on each component.
 
@@ -235,8 +276,9 @@ Detailed documentation for each ranking component is available in the `docs/` fo
 
 1. Identify the appropriate module (e.g., `team.js` for team-related features)
 2. Follow the existing code style and patterns
-3. Test manually by running the model
-4. Update this file if adding new conventions
+3. Add JSDoc-style comments in Spanish for all new functions (see Commenting Guidelines)
+4. Test manually by running the model
+5. Update this file if adding new conventions
 
 ### Debugging
 
@@ -249,7 +291,9 @@ Detailed documentation for each ranking component is available in the `docs/` fo
 - **Modify ranking algorithm**: Edit `ranking.js` or `team.js`
 - **Add new region**: Update `RegionList` in `main.js` and region mapping in `util/region.js`
 - **Change seeding factors**: Modify `SEED_MODIFIER_FACTORS` in `ranking.js`
-- **Adjust time windows**: Edit `data_loader.js` filter logic
+- **Adjust time windows**: Edit `data_loader.js` filter logic (180-day window and 30-day grace period)
+- **Understand outlier normalization**: See `ranking_context.js` - outliers ignore top N teams, not values below N
+- **Debug information content**: See `calculateMatchInformationContent` in `data_loader.js` - determines match weight in rating updates
 
 ### Important Notes
 

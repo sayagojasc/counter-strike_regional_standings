@@ -1,32 +1,22 @@
-# Bounty Offered - Componente de Ranking
+# Bounty Offered - Componente de Seeding
 
 ## Propósito
 
 El componente **Bounty Offered** busca medir el éxito financiero histórico de un equipo en el circuito profesional. La premisa es que las ganancias en torneos son un indicador del nivel del equipo: los equipos que consistentemente ganan dinero en eventos son, presumiblemente, equipos de mayor calidad.
 
-### Diferencia con Otros Componentes
-
-A diferencia de componentes como LAN Wins u Opponent Network (que evalúan partido a partido), Bounty Offered evalúa el **resultado económico del evento completo**. No importa cuántos partidos ganaste ni a quién derrotaste; lo único que importa es cuánto dinero ganaste en el evento.
-
-LAN Wins cuenta cuántas victorias obtuviste en eventos presenciales. Bounty Offered solo evalúa cuánto dinero ganaste.
-
 ## Cómo Funciona
 
 El sistema toma la ventana de tiempo más reciente (los últimos 180 días) y dentro de esa ventana evalúa las ganancias del equipo en eventos.
 
-### Diferencia con LAN Wins
-
-A diferencia de LAN Wins (que evalúa cuántos partidos ganaste en eventos presenciales), Bounty Offered evalúa el **resultado completo del evento**: cuál fue tu placement final y cuánto dinero ganaste.
-
-### El Cálculo
+### Cálculo del Componente Bounty Offered
 
 El flujo es el siguiente:
 
 1. **Recopilar ganancias**: Del historial del equipo, obtener todo el dinero ganado en los eventos en los que participó.
 
-2. **Aplicar decay temporal**: Al igual que LAN Wins, los resultados más recientes tienen mayor peso. Una ganancia de hace 10 días vale más que una de hace 160 días. Este es el único factor que afecta a las ganancias.
+2. **Aplicar decay temporal**: Los resultados más recientes tienen mayor peso.
 
-3. **Seleccionar las mejores**: De todas las ganancias con decay aplicado, quedarse con las top 10. Esto evita que un equipo con muchos premios pequeños sume más que uno con pocas ganancias grandes.
+3. **Seleccionar las mejores**: De todas las ganancias con decay aplicado, quedarse con las top 10.
 
 4. **Sumar**: En lugar de promediar (como en LAN Wins), aquí se suman los 10 valores. Esto refleja que el éxito financiero es acumulativo.
 
@@ -45,7 +35,7 @@ El flujo es el siguiente:
 - Resultado: `bountyOffered = 0`
 
 ### Ejemplo 3: Equipo con ganancias antiguas
-- Ganó $500,000 hace 170 días (peso casi 0)
+- Ganó $500,000 hace 170 días (peso muy bajo)
 - No ha ganado nada en los últimos 170 días
 - Resultado: `bountyOffered` muy bajo
 

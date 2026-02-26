@@ -1,4 +1,4 @@
-# LAN Wins - Componente de Ranking
+# LAN Wins - Componente de Seeding
 
 ## Propósito
 
@@ -6,17 +6,9 @@ El componente **LAN Wins** busca medir la capacidad de un equipo para ganar part
 
 ## Cómo Funciona
 
-El sistema toma la ventana de tiempo más reciente (los últimos 180 días aproximadamente, o 6 meses de datos disponibles) y dentro de esa ventana evalúa cada victoria del equipo.
+El sistema toma la ventana de tiempo más reciente (los últimos 180 días) y dentro de esa ventana evalúa cada victoria del equipo.
 
-### El Decay (Decaimiento)
-
-Cada resultado en el sistema tiene un peso que decae con el tiempo. Una victoria de hace 150 días vale menos que una de hace 1 semana. Este decay es lineal dentro de la ventana de 180 días:
-
-- Victoria hace 6 meses → peso: 0.0
-- Victoria hace 3 meses → peso: 0.5
-- Victoria reciente → peso: 1.0
-
-### Cálculo del Componente LAN
+### Cálculo del Componente LAN Wins
 
 El flujo es el siguiente:
 
@@ -24,43 +16,15 @@ El flujo es el siguiente:
 
 2. **Aplicar decay**: A cada victoria LAN, asignarle un peso basado en su antigüedad dentro de la ventana de 180 días.
 
-3. **Seleccionar las mejores**: De todas las victorias LAN con decay aplicado, quedarse con las top 10. Dado que el único modificador de las LAN Wins es el decay, las "mejores" son simplemente las más recientes (aquellas con menos decay aplicado). Esto evita que un equipo con muchas victorias LAN menores (ej: muchos small LANs) domine sobre uno con pocas pero significativas.
+3. **Seleccionar las mejores**: De todas las victorias LAN con decay aplicado, quedarse con las top 10. Al ser el decay el único modificador que aplica en este componente, el top 10 simplemente serán las últimas 10 victorias LAN.
 
-4. **Promediar**: Calcular el promedio de estos 10 valores. Este promedio representa el `lanParticipation` del equipo.
+4. **Promediar**: Calcular el promedio de estos 10 valores. Este promedio representa el LAN Wins del equipo.
 
-5. **Normalizar**: Este valor se compara contra los demás equipos para obtener un número entre 0 y 1.
-
-### Período de Gracia
-
-El sistema aplica un período de gracia de aproximadamente 30 días (un mes). Los partidos jugados en los últimos 30 días no se ven afectados por el decay y mantienen su peso completo (1.0). Esto permite que resultados muy recientes tengan máxima influencia en el ranking.
-
-## Ejemplos
-
-### Ejemplo 1: Equipo con buenas LAN Wins
-- Jugó 3 eventos LAN en los últimos 180 días
-- Ganó partidos en todos ellos
-- Sus victorias tienen pesos altos porque son recientes
-- Resultado: `lanParticipation` alto (cerca de 1.0)
-
-### Ejemplo 2: Equipo sin LANs recientes
-- Solo juega tournaments online
-- Tiene muchas victorias pero ninguna en LAN
-- Resultado: `lanParticipation = 0`
-
-### Ejemplo 3: Equipo con LANs antiguas
-- Ganó un major hace 150 días (peso casi 0)
-- No ha jugar LANs en los últimos 150 días
-- Resultado: `lanParticipation` muy bajo
-
-### Ejemplo 4: Equipo con muchas LANs
-- Jugó 20 partidos LAN en 180 días
-- El sistema solo toma los 10 mejores
-- Las 10 adicionales no cuentan
-- Esto protege a equipos que juegan muchas LANs pequeñas de inflar artificialmente su score
+5. **Normalizar**: Este valor se compara contra los mejores equipos para obtener un número entre 0 y 1.
 
 ## Por Qué Solo Decay
 
-A diferencia de otros componentes como Bounty (que considera el prize pool del evento o la calidad del oponente), LAN Wins es intencionalmente simple. La razón:
+A diferencia de otros componentes como Bounty Collected (que considera el prize pool del evento o la calidad del oponente), LAN Wins es intencionalmente simple. La razón:
 
 - **Señal pura**: Una victoria LAN ya es una señal de calidad por sí misma. No necesita modificadores adicionales.
 
@@ -68,12 +32,30 @@ A diferencia de otros componentes como Bounty (que considera el prize pool del e
 
 - **Simplicidad**: El propósito de LAN Wins es simplemente responder: "¿El equipo tiene historial reciente de victorias presenciales?"
 
-## Relación con Otros Componentes
+## Ejemplos
 
-- **Bounty Collected**: Derrotar a un equipo con alto LAN factor puede incrementar el bounty, pero eso es una consecuencia, no el propósito del LAN factor.
+### Ejemplo 1: Equipo con buenas LAN Wins
+- Jugó 3 eventos LAN en los últimos 60 días
+- Ganó partidos en todos ellos
+- Sus victorias tienen pesos altos porque son recientes
+- Resultado: LAN Wins alto
 
-- **Time Window**: Los 180 días aplican a todo el sistema, no solo a LAN. Esto asegura consistencia.
+### Ejemplo 2: Equipo sin LANs recientes
+- Solo juega tournaments online
+- Tiene muchas victorias pero ninguna en LAN
+- Resultado: LAN Wins nulo
+
+### Ejemplo 3: Equipo con LANs antiguas
+- Ganó un Major hace 150 días (peso casi 0)
+- No ha jugado LANs en los últimos 150 días
+- Resultado: LAN Wins muy bajo
+
+### Ejemplo 4: Equipo con muchas LANs
+- Jugó 20 partidos LAN en 180 días
+- El sistema solo toma los 10 mejores
+- Las 10 adicionales no cuentan
+- Esto protege a equipos que juegan muchas LANs pequeñas de inflar artificialmente su seeding
 
 ## Nota Importante
 
-El sistema no distingue entre diferentes tipos de LAN. Un pequeño LAN regional cuenta igual que un Major en términos de LAN Wins. La diferencia de prestigio se captura en otros componentes (Bounty, Network).
+El sistema no distingue entre diferentes tipos de LAN. Una LAN regional pequeña cuenta igual que un Major en términos de LAN Wins. La diferencia de prestigio se captura en otros componentes (Bounty Collected, Opponent Network).

@@ -1,5 +1,12 @@
 "use strict";
 
+/**
+ * Utilidades para manejar regiones geográficas de equipos
+ * 
+ * Este módulo mapea países a regiones para el ranking regional.
+ * Las regiones del ranking son: Europa (0), Américas (1), Asia (2)
+ */
+
 module.exports = {
     getCountryRegion : getCountryRegion
     ,getRegionPriority : getRegionPriority
@@ -9,6 +16,9 @@ module.exports = {
 //--------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------
 // Region Map
+// Mapea códigos de países a regiones geográficas
+// Regiones: EU (Europa), MENA (Medio Oriente/Norte de África), AF (África), 
+//          NA (Norteamérica), SA (Sudamérica), AS (Asia), OC (Oceanía), AN (Antártida)
 
 var regionMap = [
     { countrycode : 'dz', region : 'MENA' },
@@ -264,30 +274,58 @@ var regionMap = [
     { countrycode : 've', region : 'SA' },    
 ];
 
-var regionPriority = [ 3, 2, 1 ]; // [ Europe, Americas, Asia ] // Priority should follow the relative number of regional invitations in the Major Supplemental Rulebook
+/**
+ * Prioridad de regiones para el ranking regional
+ * [3, 2, 1] corresponde a [Europa, Américas, Asia]
+ * La prioridad sigue el número relativo de invitaciones regionales en el Major Supplemental Rulebook
+ */
+var regionPriority = [ 3, 2, 1 ]; // [ Europe, Americas, Asia ]
 
+/**
+ * Convierte el código de país de un jugador a una región del ranking
+ * 
+ * @param {string} playerCountry - Código de país del jugador (ej: 'us', 'br', 'jp')
+ * @returns {number} Región del ranking: 0 = Europa, 1 = Américas, 2 = Asia
+ *                  Retorna -1 si el país está en África (no hay ranking para África)
+ */
 function getCountryRegion( playerCountry ){
 
     let record = regionMap.filter( el => el.countrycode.toLowerCase() === playerCountry.toLowerCase() )[0];
     let region = record.region;
 
+    // Europa y MENA se consideran Europa para el ranking
     if ( region === 'EU' || region === 'MENA' ){
         return 0;
     }
 
+    // Norteamérica y Sudamérica se consideran Américas para el ranking
     if ( region === 'NA' || region === 'SA' )
         return 1;
 
+    // África no tiene ranking regional
     if ( region === 'AF' )
         return -1;
 
+    // Resto (Asia, Oceanía, Antártida) se considera Asia
     return 2;
 }
 
+/**
+ * Obtiene la prioridad de una región
+ * 
+ * @param {number} region - Índice de región (0 = Europa, 1 = Américas, 2 = Asia)
+ * @returns {number} Prioridad de la región
+ */
 function getRegionPriority( region ){
     return regionPriority[region];
 }
 
+/**
+ * Obtiene el índice de región a partir de su prioridad
+ * 
+ * @param {number} priority - Prioridad de la región
+ * @returns {number} Índice de la región (0 = Europa, 1 = Américas, 2 = Asia)
+ */
 function getRegionIdxFromPriority( priority ){
     return regionPriority.findIndex( el => {return el === priority } );
 }
