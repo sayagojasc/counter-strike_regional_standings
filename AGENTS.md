@@ -47,6 +47,31 @@ No linting or formatting tools are configured. Manual code review is required.
 
 ---
 
+## Git Operations
+
+### Merging with AGENTS.md
+
+AGENTS.md solo existe en la rama `agents`, no en `main`. Para evitar conflictos de merge, usá:
+
+```bash
+# Desde main, hacer merge sin conflictos
+git merge agents -s ours
+
+# O también funciona:
+git merge agents --no-commit
+git checkout --ours AGENTS.md
+git add AGENTS.md
+git commit -m "Merge agents keeping main AGENTS.md"
+```
+
+Esto mantiene `main` sin AGENTS.md mientras integrás los cambios del código de `agents`.
+
+### Configuración de merge automatizado
+
+El archivo `.gitattributes` tiene configurado `merge=ours` para AGENTS.md, pero esto solo funciona cuando no hay conflicto directo (modificar vs eliminar). El merge con `-s ours` es más confiable.
+
+---
+
 ## Code Style Guidelines
 
 ### General Principles
