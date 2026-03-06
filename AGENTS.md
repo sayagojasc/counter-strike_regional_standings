@@ -49,6 +49,10 @@ No linting or formatting tools are configured. Manual code review is required.
 
 ## Git Operations
 
+### Reglas de uso de git
+
+**IMPORTANTE**: Solo ejecutar comandos git (commit, push, pull, merge, branch, etc.) cuando el usuario lo solicite explícitamente. No realizar operaciones git por iniciativa propia.
+
 ### Merging with AGENTS.md
 
 AGENTS.md solo existe en la rama `agents`, no en `main`. Para evitar conflictos de merge, usá:
