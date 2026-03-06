@@ -63,7 +63,7 @@ function generateRanking( versionTimestamp = -1, filename )
 {
     // Crear contexto de ranking con configuración de parámetros
     // hveMod: modificador para eventos de alto valor (RMR/Majors)
-    // outlierCount: cuántos de los MEJORES valores ignorar al normalizar (ej: el 6to mejor equipo define el máximo)
+    // outlierCount: cuántos de los MEJORES valores ignorar al normalizar (ej: el 5to mejor equipo define el máximo = 1.0)
     const rankingContext = new RankingContext;
     rankingContext.setHveMod(1).setOutlierCount(5);
 

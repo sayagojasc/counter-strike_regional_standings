@@ -187,7 +187,7 @@ Example:
 
 **Important concepts to document clearly:**
 
-- **outlierCount**: Ignora los N valores más altos (los mejores equipos) al normalizar. Ej: Si outlierCount=5, el 6to mejor equipo define el máximo.
+- **outlierCount**: Ignora los N valores más altos (los mejores equipos) al normalizar. Ej: Si outlierCount=5, el 5to mejor equipo define el máximo (1.0), y a partir del 6to será menor de 1.0.
 - **informationContent**: Factor (0-1) que determina cuánto peso tiene un partido en la actualización del rating Glicko. Partidos recientes = peso completo (1), partidos antiguos = peso reducido.
 - **grace period**: Período de 30 días al final de la ventana de tiempo donde los partidos tienen peso completo. Permite que datos recientes se estabilicen antes de influir plenamente en el rating.
 - **Seeding factors**: bountyOffered (ganancias propias), bountyCollected (calidad de rivales derrotados), opponentNetwork (diversidad de rivales), lanFactor (victorias LAN). ownNetwork está deshabilitado (peso 0).
