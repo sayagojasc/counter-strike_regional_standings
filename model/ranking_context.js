@@ -36,8 +36,8 @@ class RankingContext {
          * 
          * Cuando normalizamos valores (ej: ganancias), ignoramos
          * los N mejores equipos para evitar que dominen la escala.
-         * Ej: Si outlierCount=5, el 6to mejor equipo define el máximo,
-         * y el 1ro-5to se treatan igual que el 6to.
+         * Ej: Si outlierCount=5, el 5to mejor equipo define el máximo (1.0),
+         * y el 6to en adelante será menor de 1.0.
          */
         this.topOutlierCount = 10;
         
